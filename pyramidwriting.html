@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <title>蓝格子纸面 — 自动转移（每组最多两行，Fact标签正红色，Topic输入后变黑）</title>
+  <style>
+    /* ==================== 打印样式 ==================== */
+    @page {
+      size: A4;
+      margin: 10mm;
+    }
+    @media print {
+      body * {
+        visibility: hidden;
+      }
+      .page, .page * {
+        visibility: visible;
+      }
+      .page {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 210mm;
+        height: 297mm;
+        box-shadow: none;
+      }
+    }
+    
+    /* ==================== 屏幕样式 ==================== */
+    /* 右上角打印机图标 */
+    #printButton {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      font-size: 32px;
+      cursor: pointer;
+      z-index: 1000;
+    }
+    /* 中文标题区域：仅一句，粗体 */
+    .chinese-header {
+      text-align: center;
+      margin: 20px 0;
+      font-family: "微软雅黑", sans-serif;
+      font-weight: bold;
+      font-size: 26px;
+      color: black;
+    }
+    /* 纸外左侧说明区域 */
+    .left-instructions {
+      font-size: 22px;
+      font-weight: bold;
+      color: black;
+      margin-right: 20px;
+      max-width: 300px;
+      line-height: 1.5;
+    }
+    /* 外层容器 */
+    .wrapper {
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      gap: 20px;
+      padding: 20px;
+    }
+    /* 纸（page）样式，屏幕上约为 595px×842px（对应 A4 纸） */
+    .page {
+      position: relative;
+      width: 595px;
+      height: 842px;
+      background: white;
+      box-shadow: 0 0 5px rgba(0,0,0,0.5);
+      box-sizing: border-box;
+      font-family: sans-serif;
+      counter-reset: linenum;
+    }
+    /* 左侧红色竖线 */
+    .red-margin {
+      position: absolute;
+      top: 0;
+      left: 42px;
+      height: 100%;
+      border-right: 2px solid #FF3034;
+      z-index: 2;
+    }
+    /* 顶部空白区域：10px */
+    .top-space {
+      height: 10px;
+    }
+    /* 底部空白区域：15px */
+    .bottom-space {
+      height: 15px;
+    }
+    /* Topic 区域 */
+    .topic-area {
+      text-align: center;
+      font-size: 28px;
+      color: black;  /* 用户输入时显示为黑色 */
+      text-transform: uppercase;
+      margin-bottom: 20px;
+      cursor: text;
+    }
+    .topic-area:empty:before {
+      content: "TOPIC OF YOUR ESSAY";
+      color: lightgray;
+    }
+    /* 每一行采用 Flex 布局：左侧为固定标签（如有），右侧为可编辑区域 */
+    .line-row {
+      position: relative;
+      display: flex;
+      align-items: center;
+      padding: 0 5px 0 50px; /* 左侧预留区域：42px（原行号+红线）+8px */
+      border-bottom: 1px solid #3053FF;
+      font-size: 16px;
+      color: black;
+      height: 29px;
+      line-height: 29px;
+    }
+    /* 结论行 */
+    .conclusion-row {
+      border-top: 1px solid #3053FF;
+      border-bottom: 1px solid #3053FF;
+      padding-top: 5px;
+    }
+    /* 隐藏原有的行号 */
+    .line-row::before {
+      content: none;
+    }
+    /* 固定标签 */
+    .label {
+      color: black;
+      flex: 0 0 auto;
+      margin-right: 5px;
+    }
+    /* Fact 标签：正红色 */
+    .fact {
+      color: red;
+    }
+    /* 可编辑文本区域：固定为单行显示，不自动换行 */
+    .editable-text {
+      flex: 1 1 auto;
+      display: inline-block;
+      width: calc(100% - 55px);
+      white-space: nowrap;
+      overflow: hidden;
+    }
+    /* 针对 Reason 标签设置粗体 */
+    .reason {
+      font-weight: bold;
+    }
+    /* 禁止回车 */
+    [contenteditable]:focus {
+      outline: none;
+      box-shadow: none;
+    }
+    /* 右侧拖放区域 */
+    #dropzone {
+      width: 400px;
+      height: 600px;
+      border: 2px dashed #ccc;
+      background: #f9f9f9;
+      color: #aaa;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      align-self: flex-end;
+    }
+    
+    /* 辅助函数：使用 canvas 测量文字宽度 */
+    function measureTextWidth(text, font) {
+      let canvas = measureTextWidth.canvas || (measureTextWidth.canvas = document.createElement("canvas"));
+      let context = canvas.getContext("2d");
+      context.font = font;
+      return context.measureText(text).width;
+    }
+  </style>
+</head>
+<body>
+  <!-- 右上角打印机图标 -->
+  <div id="printButton" onclick="window.print()">🖨️</div>
+  
+  <!-- 中文标题区域 -->
+  <div class="chinese-header">
+    让您的孩子马上写逻辑清楚的英语好文章
+  </div>
+  
+  <div class="wrapper">
+    <!-- 纸外左侧说明区域 -->
+    <div class="left-instructions">
+      1. 表达东西先说结论<br>
+      2. 支撑时记得说123<br>
+      3. 然后用事实支撑。
+    </div>
+    
+    <!-- A4 纸 -->
+    <div class="page">
+      <div class="red-margin"></div>
+      
+      <!-- 顶部空白区域 -->
+      <div class="top-space"></div>
+      
+      <!-- Topic 区域 -->
+      <div class="topic-area" contenteditable="true"></div>
+      
+      <!-- Block 1: Conclusion -->
+      <div class="line-row conclusion-row">
+        <span class="label" contenteditable="false">Conclusion:</span>
+        <span class="editable-text" contenteditable="true"></span>
+      </div>
+      <!-- 下一行：空的可编辑区域 -->
+      <div class="line-row">
+        <span class="editable-text" contenteditable="true"></span>
+      </div>
+      
+      <!-- Block 2: Reason 1 -->
+      <div class="line-row">
+        <span class="label reason" contenteditable="false">Reason 1</span>
+        <span class="editable-text" contenteditable="true"></span>
+      </div>
+      <!-- 补充行（第二行） -->
+      <div class="line-row">
+        <span class="editable-text" contenteditable="true"></span>
+      </div>
+      <!-- Fact a -->
+      <div class="line-row">
+        <span class="label fact" contenteditable="false">Fact a:</span>
+        <span class="editable-text" contenteditable="true"></span>
+      </div>
+      <!-- 补充行 -->
+      <div class="line-row">
+        <span class="editable-text" contenteditable="true"></span>
+      </div>
+      <!-- Fact b -->
+      <div class="line-row">
+        <span class="label fact" contenteditable="false">Fact b:</span>
+        <span class="editable-text" contenteditable="true"></span>
+      </div>
+      <!-- 补充行 -->
+      <div class="line-row">
+        <span class="editable-text" contenteditable="true"></span>
+      </div>
+      <!-- Fact c -->
+      <div class="line-row">
+        <span class="label fact" contenteditable="false">Fact c:</span>
+        <span class="editable-text" contenteditable="true"></span>
+      </div>
+      <!-- 补充行 -->
+      <div class="line-row">
+        <span class="editable-text" contenteditable="true"></span>
+      </div>
+      
+      <!-- Block 3: Reason 2 -->
+      <div class="line-row">
+        <span class="label reason" contenteditable="false">Reason 2</span>
+        <span class="editable-text" contenteditable="true"></span>
+      </div>
+      <!-- 补充行 -->
+      <div class="line-row">
+        <span class="editable-text" contenteditable="true"></span>
+      </div>
+      <!-- Fact a -->
+      <div class="line-row">
+        <span class="label fact" contenteditable="false">Fact a:</span>
+        <span class="editable-text" contenteditable="true"></span>
+      </div>
+      <!-- 补充行 -->
+      <div class="line-row">
+        <span class="editable-text" contenteditable="true"></span>
+      </div>
+      <!-- Fact b -->
+      <div class="line-row">
+        <span class="label fact" contenteditable="false">Fact b:</span>
+        <span class="editable-text" contenteditable="true"></span>
+      </div>
+      <!-- 补充行 -->
+      <div class="line-row">
+        <span class="editable-text" contenteditable="true"></span>
+      </div>
+      <!-- Fact c -->
+      <div class="line-row">
+        <span class="label fact" contenteditable="false">Fact c:</span>
+        <span class="editable-text" contenteditable="true"></span>
+      </div>
+      <!-- 补充行 -->
+      <div class="line-row">
+        <span class="editable-text" contenteditable="true"></span>
+      </div>
+      
+      <!-- Block 4: Reason 3 -->
+      <div class="line-row">
+        <span class="label reason" contenteditable="false">Reason 3</span>
+        <span class="editable-text" contenteditable="true"></span>
+      </div>
+      <!-- 补充行 -->
+      <div class="line-row">
+        <span class="editable-text" contenteditable="true"></span>
+      </div>
+      <!-- Fact a -->
+      <div class="line-row">
+        <span class="label fact" contenteditable="false">Fact a:</span>
+        <span class="editable-text" contenteditable="true"></span>
+      </div>
+      <!-- 补充行 -->
+      <div class="line-row">
+        <span class="editable-text" contenteditable="true"></span>
+      </div>
+      <!-- Fact b -->
+      <div class="line-row">
+        <span class="label fact" contenteditable="false">Fact b:</span>
+        <span class="editable-text" contenteditable="true"></span>
+      </div>
+      <!-- 补充行 -->
+      <div class="line-row">
+        <span class="editable-text" contenteditable="true"></span>
+      </div>
+      <!-- Fact c -->
+      <div class="line-row">
+        <span class="label fact" contenteditable="false">Fact c:</span>
+        <span class="editable-text" contenteditable="true"></span>
+      </div>
+      <!-- 补充行 -->
+      <div class="line-row">
+        <span class="editable-text" contenteditable="true"></span>
+      </div>
+      
+      <!-- 底部空白区域 -->
+      <div class="bottom-space"></div>
+    </div>
+    
+    <!-- 右侧拖放区域 -->
+    <div id="dropzone">Drag & drop image here</div>
+  </div>
+  
+  <script>
+    // 禁止回车键，确保每个 contenteditable 只允许单行输入
+    document.querySelectorAll('[contenteditable]').forEach(el => {
+      el.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+        }
+      });
+    });
+    
+    // 辅助函数：使用 canvas 测量文字宽度
+    function measureTextWidth(text, font) {
+      let canvas = measureTextWidth.canvas || (measureTextWidth.canvas = document.createElement("canvas"));
+      let context = canvas.getContext("2d");
+      context.font = font;
+      return context.measureText(text).width;
+    }
+    
+    /* 自动转移溢出逻辑：
+       每组假设为两行（例如 Reason 1 组中的第一行和第二行）。
+       对于第一行（index % 2 === 0）：
+         - 当内容超出时，查找最后一个空格，提取 candidate（最后一个单词）。
+         - 计算 candidate 的宽度以及当前行中 candidate 之前的文字宽度，得到 available。
+         - 如果 candidateWidth > available，则说明该单词无法完整显示，
+           则直接舍去 candidate（从当前行删除从最后一个空格开始的内容）。
+         - 如果 candidateWidth <= available，并且下一行为空，则将 candidate 整体转移到下一行，
+           并将光标定位在下一行末尾；如果下一行已有内容，则直接舍去 candidate。
+       对于第二行（index % 2 === 1）：
+         - 当内容超出时，查找最后一个空格，如果存在则删除从该空格开始的内容，
+           否则直接截断超出部分。
+         这样确保第二行不会在开头出现多余字符。
+    */
+    const editableList = Array.from(document.querySelectorAll('.editable-text'));
+    editableList.forEach((el, index) => {
+      el.addEventListener('input', function() {
+        el.style.whiteSpace = 'nowrap';
+        void el.offsetWidth; // 强制重排
+        if (index % 2 === 0) { // 第一行
+          while (el.scrollWidth > el.clientWidth) {
+            let text = el.innerText;
+            if (text.length === 0) break;
+            let lastSpace = text.lastIndexOf(' ');
+            if (lastSpace === -1) {
+              el.innerText = "";
+              break;
+            }
+            let candidate = text.slice(lastSpace + 1);
+            let computedStyle = window.getComputedStyle(el);
+            let font = computedStyle.font;
+            let candidateWidth = measureTextWidth(candidate, font);
+            let widthBefore = measureTextWidth(text.slice(0, lastSpace), font);
+            let available = el.clientWidth - widthBefore;
+            if (candidateWidth > available) {
+              // candidate 不能完整显示，舍去 candidate
+              el.innerText = text.slice(0, lastSpace);
+              break;
+            } else {
+              if (index < editableList.length - 1) {
+                let nextEl = editableList[index + 1];
+                if (nextEl.innerText.trim() === "") {
+                  el.innerText = text.slice(0, lastSpace);
+                  nextEl.innerText = candidate;
+                  // 将光标置于 nextEl 末尾
+                  nextEl.focus();
+                  let range = document.createRange();
+                  range.selectNodeContents(nextEl);
+                  range.collapse(false);
+                  let sel = window.getSelection();
+                  sel.removeAllRanges();
+                  sel.addRange(range);
+                  break;
+                } else {
+                  // 下一行已有内容，舍去 candidate
+                  el.innerText = text.slice(0, lastSpace);
+                  break;
+                }
+              } else {
+                el.innerText = text.slice(0, lastSpace);
+                break;
+              }
+            }
+          }
+        } else { // 第二行
+          while (el.scrollWidth > el.clientWidth) {
+            let text = el.innerText;
+            if (text.length === 0) break;
+            let lastSpace = text.lastIndexOf(' ');
+            if (lastSpace !== -1) {
+              el.innerText = text.slice(0, lastSpace);
+            } else {
+              el.innerText = "";
+            }
+            break;
+          }
+        }
+      });
+    });
+    
+    // 右侧拖放区域处理
+    const dropzone = document.getElementById('dropzone');
+    dropzone.addEventListener('dragover', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      dropzone.style.borderColor = '#3053FF';
+    });
+    dropzone.addEventListener('dragleave', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      dropzone.style.borderColor = '#ccc';
+    });
+    dropzone.addEventListener('drop', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      dropzone.style.border = 'none';
+      const files = e.dataTransfer.files;
+      if (files.length) {
+        const file = files[0];
+        if (file.type.startsWith('image/')) {
+          const reader = new FileReader();
+          reader.onload = function(event) {
+            const img = document.createElement('img');
+            img.src = event.target.result;
+            img.style.maxWidth = '100%';
+            img.style.maxHeight = '100%';
+            dropzone.innerHTML = '';
+            dropzone.appendChild(img);
+          };
+          reader.readAsDataURL(file);
+        }
+      }
+    });
+  </script>
+</body>
+</html>
