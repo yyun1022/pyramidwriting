@@ -2,8 +2,36 @@
 <html lang="zh">
 <head>
   <meta charset="UTF-8">
+  <!-- 添加 viewport meta 标签以确保响应式 -->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>蓝格子纸面 — 自动转移（每组最多两行，Fact标签正红色，Topic输入后变黑）</title>
   <style>
+    /* ==================== 通用样式 ==================== */
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: sans-serif;
+    }
+    /* 网站头部 */
+    .site-header {
+      display: flex;
+      align-items: center;
+      padding: 10px 20px;
+      background: #f5f5f5;
+      border-bottom: 1px solid #ddd;
+    }
+    .site-logo {
+      height: 40px;
+      width: auto;
+      margin-right: 10px;
+    }
+    .site-title {
+      font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+      font-weight: bold;
+      font-size: 24px;
+      color: #333;
+    }
+    
     /* ==================== 打印样式 ==================== */
     @page {
       size: A4;
@@ -23,6 +51,11 @@
         width: 210mm;
         height: 297mm;
         box-shadow: none;
+      }
+      .site-header,
+      .left-instructions,
+      .sidebar-image {
+        display: none;
       }
     }
     
@@ -61,6 +94,7 @@
       align-items: flex-start;
       gap: 20px;
       padding: 20px;
+      flex-wrap: wrap;
     }
     /* 纸（page）样式，屏幕上约为 595px×842px（对应 A4 纸） */
     .page {
@@ -70,8 +104,8 @@
       background: white;
       box-shadow: 0 0 5px rgba(0,0,0,0.5);
       box-sizing: border-box;
-      font-family: sans-serif;
       counter-reset: linenum;
+      margin-bottom: 20px;
     }
     /* 左侧红色竖线 */
     .red-margin {
@@ -94,7 +128,7 @@
     .topic-area {
       text-align: center;
       font-size: 28px;
-      color: black;  /* 用户输入时显示为黑色 */
+      color: black;
       margin-bottom: 20px;
       cursor: text;
     }
@@ -163,7 +197,7 @@
     }
     /* 右侧图片区域样式 */
     .sidebar-image {
-      max-width: 400px; /* 根据需要调整宽度 */
+      max-width: 400px;
       margin-top: 20px;
     }
     .sidebar-image img {
@@ -171,9 +205,32 @@
       height: auto;
       display: block;
     }
+    
+    /* ==================== 响应式调整 ==================== */
+    @media (max-width: 768px) {
+      .wrapper {
+        flex-direction: column;
+        align-items: center;
+      }
+      .page {
+        width: 90%;
+        height: auto;
+      }
+      .left-instructions,
+      .sidebar-image {
+        max-width: 90%;
+      }
+    }
   </style>
 </head>
 <body>
+  <!-- 网站头部：左上角 logo 与标题 -->
+  <header class="site-header">
+    <!-- 替换下面 logo 链接为你自己的 -->
+    <img class="site-logo" src="https://github.com/yyun1022/pyramidwriting/blob/a0cfb72f3f64610832cc2c6c2b58ed97c0db7459/pyramid%20(1).png" alt="Site Logo">
+    <span class="site-title">Pyramid Writing 金字塔写作</span>
+  </header>
+  
   <!-- 右上角打印机图标 -->
   <div id="printButton" onclick="window.print()">🖨️</div>
   
@@ -325,10 +382,9 @@
       <div class="bottom-space"></div>
     </div>
     
-    <!-- 右侧图片区域（插入你希望显示的图片） -->
+    <!-- 右侧图片区域（此处使用 GitHub 上图片的 raw 链接，请替换为你的实际链接） -->
     <div class="sidebar-image">
-      <img src="https://raw.githubusercontent.com/yyun1022/pyramidwriting/main/8f05e2ec2c7b5dff.png
-" alt="Your image">
+      <img src="https://raw.githubusercontent.com/你的用户名/你的仓库名/分支名/路径/图片文件名.jpg" alt="Your image">
     </div>
   </div>
   
