@@ -161,26 +161,15 @@
       outline: none;
       box-shadow: none;
     }
-    /* 右侧拖放区域 */
-    #dropzone {
-      width: 400px;
-      height: 600px;
-      border: 2px dashed #ccc;
-      background: #f9f9f9;
-      color: #aaa;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 16px;
-      align-self: flex-end;
+    /* 右侧图片区域样式 */
+    .sidebar-image {
+      max-width: 400px; /* 根据需要调整宽度 */
+      margin-top: 20px;
     }
-    
-    /* 辅助函数：使用 canvas 测量文字宽度 */
-    function measureTextWidth(text, font) {
-      let canvas = measureTextWidth.canvas || (measureTextWidth.canvas = document.createElement("canvas"));
-      let context = canvas.getContext("2d");
-      context.font = font;
-      return context.measureText(text).width;
+    .sidebar-image img {
+      width: 100%;
+      height: auto;
+      display: block;
     }
   </style>
 </head>
@@ -190,7 +179,7 @@
   
   <!-- 中文标题区域 -->
   <div class="chinese-header">
-    Pyramid Writing - 让您的孩子马上写逻辑清楚的英语好文章！
+    让您的孩子马上写逻辑清楚的英语好文章
   </div>
   
   <div class="wrapper">
@@ -226,7 +215,7 @@
         <span class="label reason" contenteditable="false">Reason 1</span>
         <span class="editable-text" contenteditable="true" data-placeholder="你的第一个理由"></span>
       </div>
-      <!-- 补充行（第二行） -->
+      <!-- 补充行 -->
       <div class="line-row">
         <span class="editable-text" contenteditable="true"></span>
       </div>
@@ -336,8 +325,10 @@
       <div class="bottom-space"></div>
     </div>
     
-    <!-- 右侧拖放区域 -->
-    <div id="dropzone">Drag & drop image here</div>
+    <!-- 右侧图片区域（插入你希望显示的图片） -->
+    <div class="sidebar-image">
+      <img src="https://github.com/yyun1022/pyramidwriting/blob/b9b6b1f2081acfe386337918e12d0d9093013775/8f05e2ec2c7b5dff.png" alt="Your image">
+    </div>
   </div>
   
   <script>
@@ -437,40 +428,7 @@
         }
       });
     });
-    
-    // 右侧拖放区域处理
-    const dropzone = document.getElementById('dropzone');
-    dropzone.addEventListener('dragover', function(e) {
-      e.preventDefault();
-      e.stopPropagation();
-      dropzone.style.borderColor = '#3053FF';
-    });
-    dropzone.addEventListener('dragleave', function(e) {
-      e.preventDefault();
-      e.stopPropagation();
-      dropzone.style.borderColor = '#ccc';
-    });
-    dropzone.addEventListener('drop', function(e) {
-      e.preventDefault();
-      e.stopPropagation();
-      dropzone.style.border = 'none';
-      const files = e.dataTransfer.files;
-      if (files.length) {
-        const file = files[0];
-        if (file.type.startsWith('image/')) {
-          const reader = new FileReader();
-          reader.onload = function(event) {
-            const img = document.createElement('img');
-            img.src = event.target.result;
-            img.style.maxWidth = '100%';
-            img.style.maxHeight = '100%';
-            dropzone.innerHTML = '';
-            dropzone.appendChild(img);
-          };
-          reader.readAsDataURL(file);
-        }
-      }
-    });
   </script>
 </body>
 </html>
+
