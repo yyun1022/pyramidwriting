@@ -95,12 +95,11 @@
       text-align: center;
       font-size: 28px;
       color: black;  /* 用户输入时显示为黑色 */
-      text-transform: uppercase;
       margin-bottom: 20px;
       cursor: text;
     }
     .topic-area:empty:before {
-      content: "TOPIC OF YOUR ESSAY";
+      content: "Topic of your essay";
       color: lightgray;
     }
     /* 每一行采用 Flex 布局：左侧为固定标签（如有），右侧为可编辑区域 */
@@ -131,6 +130,11 @@
       flex: 0 0 auto;
       margin-right: 5px;
     }
+    /* 设置结论和 Fact 标签为粗体 */
+    .conclusion-row .label,
+    .fact {
+      font-weight: bold;
+    }
     /* Fact 标签：正红色 */
     .fact {
       color: red;
@@ -142,6 +146,11 @@
       width: calc(100% - 55px);
       white-space: nowrap;
       overflow: hidden;
+    }
+    /* 设置带 data-placeholder 属性的占位符样式 */
+    .editable-text[data-placeholder]:empty:before {
+      content: attr(data-placeholder);
+      color: lightgray;
     }
     /* 针对 Reason 标签设置粗体 */
     .reason {
@@ -181,7 +190,7 @@
   
   <!-- 中文标题区域 -->
   <div class="chinese-header">
-    让您的孩子马上写逻辑清楚的英语好文章
+    PYRAMID WRITING - 让您的孩子马上写逻辑清楚的英语好文章！
   </div>
   
   <div class="wrapper">
@@ -205,7 +214,7 @@
       <!-- Block 1: Conclusion -->
       <div class="line-row conclusion-row">
         <span class="label" contenteditable="false">Conclusion:</span>
-        <span class="editable-text" contenteditable="true"></span>
+        <span class="editable-text" contenteditable="true" data-placeholder="你的结论在这里简单的写."></span>
       </div>
       <!-- 下一行：空的可编辑区域 -->
       <div class="line-row">
@@ -215,7 +224,7 @@
       <!-- Block 2: Reason 1 -->
       <div class="line-row">
         <span class="label reason" contenteditable="false">Reason 1</span>
-        <span class="editable-text" contenteditable="true"></span>
+        <span class="editable-text" contenteditable="true" data-placeholder="你的第一个理由"></span>
       </div>
       <!-- 补充行（第二行） -->
       <div class="line-row">
@@ -224,7 +233,7 @@
       <!-- Fact a -->
       <div class="line-row">
         <span class="label fact" contenteditable="false">Fact a:</span>
-        <span class="editable-text" contenteditable="true"></span>
+        <span class="editable-text" contenteditable="true" data-placeholder="用第一个事实支撑"></span>
       </div>
       <!-- 补充行 -->
       <div class="line-row">
@@ -233,7 +242,7 @@
       <!-- Fact b -->
       <div class="line-row">
         <span class="label fact" contenteditable="false">Fact b:</span>
-        <span class="editable-text" contenteditable="true"></span>
+        <span class="editable-text" contenteditable="true" data-placeholder="用第二个事实支撑"></span>
       </div>
       <!-- 补充行 -->
       <div class="line-row">
@@ -242,7 +251,7 @@
       <!-- Fact c -->
       <div class="line-row">
         <span class="label fact" contenteditable="false">Fact c:</span>
-        <span class="editable-text" contenteditable="true"></span>
+        <span class="editable-text" contenteditable="true" data-placeholder="用第三个事实支撑"></span>
       </div>
       <!-- 补充行 -->
       <div class="line-row">
@@ -252,7 +261,7 @@
       <!-- Block 3: Reason 2 -->
       <div class="line-row">
         <span class="label reason" contenteditable="false">Reason 2</span>
-        <span class="editable-text" contenteditable="true"></span>
+        <span class="editable-text" contenteditable="true" data-placeholder="你的第二个理由"></span>
       </div>
       <!-- 补充行 -->
       <div class="line-row">
@@ -261,7 +270,7 @@
       <!-- Fact a -->
       <div class="line-row">
         <span class="label fact" contenteditable="false">Fact a:</span>
-        <span class="editable-text" contenteditable="true"></span>
+        <span class="editable-text" contenteditable="true" data-placeholder="用第一个事实支撑"></span>
       </div>
       <!-- 补充行 -->
       <div class="line-row">
@@ -270,7 +279,7 @@
       <!-- Fact b -->
       <div class="line-row">
         <span class="label fact" contenteditable="false">Fact b:</span>
-        <span class="editable-text" contenteditable="true"></span>
+        <span class="editable-text" contenteditable="true" data-placeholder="用第二个事实支撑"></span>
       </div>
       <!-- 补充行 -->
       <div class="line-row">
@@ -279,7 +288,7 @@
       <!-- Fact c -->
       <div class="line-row">
         <span class="label fact" contenteditable="false">Fact c:</span>
-        <span class="editable-text" contenteditable="true"></span>
+        <span class="editable-text" contenteditable="true" data-placeholder="用第三个事实支撑"></span>
       </div>
       <!-- 补充行 -->
       <div class="line-row">
@@ -289,7 +298,7 @@
       <!-- Block 4: Reason 3 -->
       <div class="line-row">
         <span class="label reason" contenteditable="false">Reason 3</span>
-        <span class="editable-text" contenteditable="true"></span>
+        <span class="editable-text" contenteditable="true" data-placeholder="你的第三个理由"></span>
       </div>
       <!-- 补充行 -->
       <div class="line-row">
@@ -298,7 +307,7 @@
       <!-- Fact a -->
       <div class="line-row">
         <span class="label fact" contenteditable="false">Fact a:</span>
-        <span class="editable-text" contenteditable="true"></span>
+        <span class="editable-text" contenteditable="true" data-placeholder="用第一个事实支撑"></span>
       </div>
       <!-- 补充行 -->
       <div class="line-row">
@@ -307,7 +316,7 @@
       <!-- Fact b -->
       <div class="line-row">
         <span class="label fact" contenteditable="false">Fact b:</span>
-        <span class="editable-text" contenteditable="true"></span>
+        <span class="editable-text" contenteditable="true" data-placeholder="用第二个事实支撑"></span>
       </div>
       <!-- 补充行 -->
       <div class="line-row">
@@ -316,7 +325,7 @@
       <!-- Fact c -->
       <div class="line-row">
         <span class="label fact" contenteditable="false">Fact c:</span>
-        <span class="editable-text" contenteditable="true"></span>
+        <span class="editable-text" contenteditable="true" data-placeholder="用第三个事实支撑"></span>
       </div>
       <!-- 补充行 -->
       <div class="line-row">
