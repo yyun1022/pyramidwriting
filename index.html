@@ -78,15 +78,23 @@
       font-size: 26px;
       color: black;
     }
-    /* 纸外左侧说明区域 */
+    /* 左侧说明区域（Essay topics suggestions） */
     .left-instructions {
-      font-size: 22px;
-      font-weight: bold;
-      color: black;
-      margin-right: 20px;
+      font-size: 16px;
+      color: #333;
+      padding: 15px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      background: #fafafa;
+      margin-right: 30px; /* 离纸张区域更远 */
       max-width: 300px;
-      line-height: 1.5;
+      line-height: 1.6;
     }
+    /* 对“Essay topics suggestions:”加粗 */
+    .left-instructions strong {
+      font-size: 18px;
+    }
+    
     /* 外层容器 */
     .wrapper {
       display: flex;
@@ -141,7 +149,7 @@
       position: relative;
       display: flex;
       align-items: center;
-      padding: 0 5px 0 50px; /* 左侧预留区域：42px（原行号+红线）+8px */
+      padding: 0 5px 0 50px;
       border-bottom: 1px solid #3053FF;
       font-size: 16px;
       color: black;
@@ -393,8 +401,7 @@
     
     <!-- 右侧图片区域（此处使用 GitHub 上图片的 raw 链接，请替换为你的实际链接） -->
     <div class="sidebar-image">
-      <img src="https://raw.githubusercontent.com/yyun1022/pyramidwriting/main/8f05e2ec2c7b5dff.png
-" alt="Your image">
+      <img src="https://raw.githubusercontent.com/yyun1022/pyramidwriting/main/8f05e2ec2c7b5dff.png" alt="Your image">
     </div>
   </div>
   
